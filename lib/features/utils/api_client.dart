@@ -88,6 +88,7 @@ class ApiClient {
   }
 
   Future<Response> dioGet(url, {Map<String, dynamic>? queryParameters}) async {
+    AppLogger.instance.logInfo(url);
     return myDioClient!.get(
       url,
       options: await getOptionsWithToken(),
@@ -99,7 +100,6 @@ class ApiClient {
     return Options(
         contentType: 'application/json',
         headers: {
-          'x-rapidapi-host': ' trustpilot-company-and-reviewsdata.p.rapidapi.com',
           'x-rapidapi-key': Api.apiKey,
         }
     );

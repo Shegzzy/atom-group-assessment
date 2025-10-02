@@ -5,10 +5,11 @@ import '../../utils/app_logger.dart';
 
 class SearchCompanyRepository {
 
-  Future<dynamic> getSearchResults (String query) async {
-    String url = "";
+  Future<dynamic> getSearchResults (String query, int page) async {
+    String url = "company-search";
     Map<String, dynamic> queryParameters = {
       'query': query,
+      'page': page,
     };
 
     try {

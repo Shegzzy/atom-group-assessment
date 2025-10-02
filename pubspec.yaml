@@ -38,6 +38,7 @@ dependencies:
   logger:
   toastification: ^2.0.0
   google_fonts:
+  provider:
 
 
 dev_dependencies:

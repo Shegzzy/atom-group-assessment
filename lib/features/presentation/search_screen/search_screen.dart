@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/models/company_model.dart';
 import '../../data/viewmodels/search_vm.dart';
 import '../details_screen/company_details.dart';
 

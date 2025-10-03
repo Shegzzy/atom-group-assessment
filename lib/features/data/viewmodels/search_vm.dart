@@ -8,10 +8,6 @@ import '../repositories/search_repo.dart';
 
 class SearchCompanyVm extends ChangeNotifier {
   TextEditingController searchController = TextEditingController();
-
-  ScrollController _scrollController = ScrollController();
-  ScrollController get scrollController => _scrollController;
-
   final _searchCompanyRepository = SearchCompanyRepository();
   List<CompanyModel> _searchResults = [];
   List<CompanyModel> get searchResults => _searchResults;
@@ -50,11 +46,11 @@ class SearchCompanyVm extends ChangeNotifier {
 
 
 
-  Future<dynamic> getSearchResults(String query) async {
+  Future<List<CompanyModel>> getSearchResults(String query) async {
     isLoading = true;
 
     try {
-      if (query.isEmpty) return;
+      if (query.isEmpty) return _searchResults;
 
       final response = await _searchCompanyRepository.getSearchResults(query, _currentPage);
 

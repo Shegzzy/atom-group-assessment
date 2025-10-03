@@ -38,7 +38,9 @@ class ReviewVm extends ChangeNotifier {
 
   Future<List<ReviewModel>> getReviews(String query) async {
     try {
-      if (query.isEmpty) return [];
+      if (query.isEmpty) {
+        return _reviews;
+      }
 
       final response = await _reviewRepository.getCompanyReviews(query, _currentPage);
 
@@ -66,7 +68,6 @@ class ReviewVm extends ChangeNotifier {
   }
 
   Future<dynamic> checkAndLoadMore(String query) async {
-    print('Checking for more');
     try {
       if (_reviews.length < totalReviews) {
         canLoadMore = true;

@@ -3,6 +3,7 @@ import 'package:atom_assessment/features/utils/app_logger.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../../utils/app_snackbar.dart';
+import '../../utils/sharedprefs.dart';
 import '../repositories/search_repo.dart';
 
 class SearchCompanyVm extends ChangeNotifier {
@@ -14,6 +15,9 @@ class SearchCompanyVm extends ChangeNotifier {
   final _searchCompanyRepository = SearchCompanyRepository();
   List<CompanyModel> _searchResults = [];
   List<CompanyModel> get searchResults => _searchResults;
+
+  List<String> _favoriteIds = [];
+  List<String> get favoriteIds => _favoriteIds;
 
   int _currentPage = 1;
   int get currentPage => _currentPage;
@@ -65,6 +69,7 @@ class SearchCompanyVm extends ChangeNotifier {
 
         _searchResults = data.map<CompanyModel>((company) => CompanyModel.fromJson(company)).toList();
         AppLogger.instance.logInfo(searchResults);
+        loadFavorites();
         return _searchResults;
       } else {
         showErrorBar (payload['message'] ?? 'Error occurred searching companies');
@@ -90,7 +95,6 @@ class SearchCompanyVm extends ChangeNotifier {
   }
 
   Future<dynamic> checkAndLoadMore() async {
-    print('Checking for more');
     try {
       if (_searchResults.length < totalCompanies) {
         canLoadMore = true;
@@ -109,9 +113,10 @@ class SearchCompanyVm extends ChangeNotifier {
 
           _searchResults.addAll(data.map<CompanyModel>((company) => CompanyModel.fromJson(company)));
           AppLogger.instance.logInfo(searchResults);
+          loadFavorites();
           return _searchResults;
         } else {
-          showErrorBar (payload['message'] ?? 'Error occurred searching companies');
+          showErrorBar (payload['message'] ?? 'Error occurred loading more companies');
           return _searchResults;
         }
       }
@@ -122,4 +127,31 @@ class SearchCompanyVm extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> loadFavorites() async {
+    final pref = SharedPrefs.instance;
+    final favoriteIds = await pref.retrieveString('favorite_ids');
+
+    AppLogger.instance.logInfo(favoriteIds.length);
+
+    if (favoriteIds.isNotEmpty) {
+      _favoriteIds = favoriteIds;
+    }
+    notifyListeners();
+  }
+
+  Future<void> toggleFavorite(String companyId) async {
+    final pref = SharedPrefs.instance;
+    final isFavorite = _favoriteIds.contains(companyId);
+    if (isFavorite) {
+      _favoriteIds.remove(companyId);
+    } else {
+      _favoriteIds.add(companyId);
+    }
+
+    await pref.saveString('favorite_ids', _favoriteIds);
+    notifyListeners();
+  }
+
+  bool isFavorite(String companyId) => _favoriteIds.contains(companyId);
 }

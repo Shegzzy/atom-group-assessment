@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../data/models/company_model.dart';
 import '../../data/viewmodels/search_vm.dart';
+import '../details_screen/company_details.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -18,8 +19,8 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<SearchCompanyVm>().scrollController.addListener(() {
-      if (context.read<SearchCompanyVm>().scrollController.position.pixels == context.read<SearchCompanyVm>().scrollController.position.maxScrollExtent) {
+    scrollController.addListener(() {
+      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
         context.read<SearchCompanyVm>().checkAndLoadMore();
       }
     });
@@ -28,6 +29,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Company Search'),
       ),
@@ -37,13 +39,15 @@ class _SearchScreenState extends State<SearchScreen> {
             builder: (context, searchCompanyVm, _) {
             return Column(
               children: [
-                TextField(
+                TextFormField(
                   controller: context.read<SearchCompanyVm>().searchController,
-                  onSubmitted: (value) => context.read<SearchCompanyVm>().onSearch(),
+                  onFieldSubmitted: (value) => context.read<SearchCompanyVm>().onSearch(),
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
                     hintText: 'Search',
                     prefixIcon: Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -61,7 +65,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   visible: !searchCompanyVm.isLoading,
                   child: Expanded(
                     child: ListView.separated(
-                      controller: searchCompanyVm.scrollController,
+                      controller: scrollController,
                       itemCount: searchCompanyVm.searchResults.length + 1,
                       itemBuilder: (context, index) {
                         if(index < searchCompanyVm.searchResults.length) {
@@ -69,12 +73,23 @@ class _SearchScreenState extends State<SearchScreen> {
                           return ListTile(
                             title: Text(company.name),
                             subtitle: Text('Reviews: ${company.reviewCount}'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Icon(Icons.star, color: Colors.green, size: 12,),
-                                SizedBox(width: 3),
-                                Text(company.rating.toString()),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.star, color: Colors.green, size: 12,),
+                                    SizedBox(width: 3),
+                                    Text(company.rating.toString()),
+                                  ],
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    searchCompanyVm.toggleFavorite(company.companyId);
+                                  },
+                                  child: searchCompanyVm.favoriteIds.contains(company.companyId) ? Icon(Icons.favorite, size: 20, color: Colors.red,) : Icon(Icons.favorite_border, size: 20, color: Colors.grey,))
                               ],
                             ),
                             dense: true,
@@ -85,6 +100,11 @@ class _SearchScreenState extends State<SearchScreen> {
                                 width: 1,
                               ),
                             ),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) => CompanyReviewDetails(company: company.website))
+                              );
+                            },
                           );
                         } else {
                           return searchCompanyVm.canLoadMore ? Center(child: CircularProgressIndicator.adaptive()) : SizedBox.shrink();
@@ -93,7 +113,6 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                 ),
-
               ],
             );
           }

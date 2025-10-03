@@ -1,10 +1,12 @@
 import 'package:atom_assessment/features/presentation/search_screen/search_screen.dart';
 import 'package:atom_assessment/features/utils/api_client.dart';
+import 'package:atom_assessment/features/utils/sharedprefs.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
+import 'features/data/viewmodels/review_vm.dart';
 import 'features/data/viewmodels/search_vm.dart';
 import 'features/utils/app_logger.dart';
 
@@ -12,9 +14,12 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   ApiClient.instance.initializeDio();
   AppLogger.instance.initializeAppLogger();
+  SharedPrefs.instance.initializePreference();
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => SearchCompanyVm()),
+      ChangeNotifierProvider(create: (_) => ReviewVm()),
     ],
     child: const MyApp(),
   ));
